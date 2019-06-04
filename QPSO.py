@@ -4,15 +4,16 @@ import math
 import pandas as pd
 import numpy as np
 import time
+import sys
 
 #dataset = pd.read_csv('PSOdata.csv')
 
 
 # function we are attempting to optimize (minimize)
-def func1(x):
-	total=0
-	total = (dataset["x"]**x[0]*dataset["y"]**x[1]).sum()
-	return total
+#def func1(x):
+#	total=0
+#	total = (dataset["x"]**x[0]*dataset["y"]**x[1]).sum()
+#	return total
 
 class Particle:
 	def __init__(self,x0,num_dimensions):          
@@ -54,51 +55,64 @@ class Particle:
 				self.position_i[i]=bounds[i][0]'''
 
 
-
 class QPSO():
-	def __init__(self, costFunc, x0, num_particles, maxiter, verbose=False):
-		#print(x0)
-		beta=-0.77
-		t_old=0
-		t_new=0
-		num_dimensions=len(x0)
-		err_best_g=-1                   # best error for group
-		self.pos_best_g=[]                   # best position for group
-		pos_mbest=np.empty(num_dimensions)
+    def __init__(self, costFunc, x0, num_particles, maxiter, verbose=False):
+        beta=-0.77
+        t_old=0
+        t_new=0
+        num_dimensions=len(x0)
+        err_best_g=-1                   # best error for group
+        self.pos_best_g=[]                   # best position for group
+        pos_mbest=np.empty(num_dimensions)
 
 		# establish the swarm
-		swarm=[]
-		for i in range(0,num_particles):
-			swarm.append(Particle(x0,num_dimensions))
-
+        swarm=[]
+        for i in range(0,num_particles):
+            swarm.append(Particle(x0,num_dimensions))
+        print('SIZE ',sys.getsizeof(swarm))
 		# begin optimization loop
-		i=0
-		while i<maxiter:
-			pos_mbest=np.empty(num_dimensions)
-			if verbose: print('iter: {}, best solution: {} time elasped in secs:{}'.format(i,err_best_g,int(t_old-t_new)))
-			t_new = time.time()
+        i=0
+        t_old = time.time()
+        sat_count = 0
+        err_best_g_prev = 0
+        diff = 0
+        while i<maxiter:
+            if sat_count >49:
+                print('saturated')
+                exit(0)
+            pos_mbest=np.empty(num_dimensions)
+            if verbose: print('iter: {}, best solution: {} time elapsed in secs:{}'.format(i,err_best_g,int(t_new-t_old)))
+            
+            t_new = time.time()
 			# cycle through particles in swarm and evaluate fitness
-			for j in range(0,num_particles):
-				swarm[j].evaluate(costFunc)
-				pos_mbest=np.add(pos_mbest,swarm[j].pos_best_i)#calculate mean of best position of all particles
+            for j in range(0,num_particles):
+                swarm[j].evaluate(costFunc)
+                pos_mbest=np.add(pos_mbest,swarm[j].pos_best_i)#calculate mean of best position of all particles
 
 				# determine if current particle is the best (globally)
-				if swarm[j].err_i<err_best_g or err_best_g==-1:
-					self.pos_best_g=list(swarm[j].position_i)
-					err_best_g=float(swarm[j].err_i)
-
-			pos_mbest=pos_mbest/num_particles
-			pos_mbest=list(pos_mbest)
-
+                if swarm[j].err_i<err_best_g or err_best_g==-1:
+                    self.pos_best_g = 0
+                    self.pos_best_g=list(swarm[j].position_i)
+                    err_best_g=float(swarm[j].err_i)
+                   
+            pos_mbest=pos_mbest/num_particles
+            pos_mbest=list(pos_mbest)
+            diff = err_best_g_prev-err_best_g
+            if int(diff)==0:
+                sat_count+=1
+            else:
+                sat_count = 0
+#            print('prev,curr,sat_count',err_best_g_prev,err_best_g,diff,sat_count)
 			# cycle through swarm and update velocities and position
-			for j in range(0,num_particles):
-				swarm[j].update_position(self.pos_best_g,pos_mbest,beta)
-			i+=1
-			t_old = time.time()
+            for j in range(0,num_particles):
+                swarm[j].update_position(self.pos_best_g,pos_mbest,beta)
+            i+=1
+            err_best_g_prev = err_best_g
+			
 		# print final results
-		print('\nFINAL SOLUTION:')
+        print('\nFINAL SOLUTION:')
 		#print('   > {}'.format(self.pos_best_g))
-		print('   > {}\n'.format(err_best_g))
+        print('   > {}\n'.format(err_best_g))
 #if __name__ == "__QPSO__":
 #	main()
 
