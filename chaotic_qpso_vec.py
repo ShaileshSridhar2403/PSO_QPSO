@@ -1,9 +1,9 @@
 import numpy as np 
 import math
 import time
+import chaosGeneration as cg
 
-
-def QPSO(swarm,localbcosts,beta,maxiter,costfunc,verbose,logfile):
+def CQPSO(swarm,localbcosts,beta,maxiter,costfunc,verbose,logfile):
 	f = open(logfile,'a')
 	f.truncate(0)									
 	num_dim = swarm.shape[1]
@@ -19,6 +19,7 @@ def QPSO(swarm,localbcosts,beta,maxiter,costfunc,verbose,logfile):
 	while (i<maxiter):
 		if sat_count >49:
 			print('saturated')
+#			print('values=',cg.lastVal)
 			return pos_best_g,err_best_g,i
 		t_old = time.time()
 		pos_best_g,err_best_g,swarm = costfunc(swarm,localbcosts)
@@ -28,10 +29,10 @@ def QPSO(swarm,localbcosts,beta,maxiter,costfunc,verbose,logfile):
 		else:
 			sat_count = 0
 		pos_mbest = np.mean(swarm[:,1],axis=0) #only one column?
-		c1 = np.random.random_sample((num_partcles,1))
-		c2 = np.random.random_sample((num_partcles,1))
-		u = np.random.random_sample((num_partcles,1))
-		k = np.random.random_sample((num_partcles,1))
+		c1 = cg.tentMapChaosSeq_01((num_partcles,1))
+		c2 = cg.tentMapChaosSeq_01((num_partcles,1))
+		u = cg.tentMapChaosSeq_01((num_partcles,1))
+		k = cg.tentMapChaosSeq_01((num_partcles,1))
 		
 		p = (c1*swarm[:,1]+c2*pos_best_g)/(c1+c2)
 		Xfactor = beta*abs(pos_mbest-swarm[:,0])*np.log(1/u) #shouldn't this be mbest?
