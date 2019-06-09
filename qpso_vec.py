@@ -22,7 +22,7 @@ def QPSO(swarm,localbcosts,beta,maxiter,costfunc,verbose,logfile):
 			return pos_best_g,err_best_g,i
 		t_old = time.time()
 		pos_best_g,err_best_g,swarm = costfunc(swarm,localbcosts)
-		diff = err_best_g_prev-err_best_g
+		diff = round(int(err_best_g_prev),2)-round(int(err_best_g),2)
 		if int(diff)==0:
 			sat_count+=1
 		else:

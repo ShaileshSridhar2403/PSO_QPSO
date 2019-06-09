@@ -24,12 +24,12 @@ def CPSO(swarm,localbcosts,w,c1,c2,maxiter,costfunc,verbose,logfile):
 	err_best_g_prev = 0
 	t_total_old = time.time()
 	while (i<maxiter):
-		if sat_count >90:
+		if sat_count >49:
 			print('saturated')
 			return pos_best_g,err_best_g,i
 		t_old = time.time()
 		pos_best_g,err_best_g,swarm = costfunc(swarm,localbcosts)
-		diff = err_best_g_prev-err_best_g
+		diff = round(int(err_best_g_prev),2)-round(int(err_best_g),2)
 		if int(diff)==0:
 			sat_count+=1
 		else:

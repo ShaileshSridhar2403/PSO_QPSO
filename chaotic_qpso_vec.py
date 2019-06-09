@@ -23,8 +23,8 @@ def CQPSO(swarm,localbcosts,beta,maxiter,costfunc,verbose,logfile):
 			return pos_best_g,err_best_g,i
 		t_old = time.time()
 		pos_best_g,err_best_g,swarm = costfunc(swarm,localbcosts)
-		diff = err_best_g_prev-err_best_g
-		if int(diff)==0:
+		diff = round(err_best_g_prev,2)-round(err_best_g,2)
+		if diff==0:
 			sat_count+=1
 		else:
 			sat_count = 0
