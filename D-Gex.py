@@ -27,20 +27,20 @@ def getbatch(bsize):
 	return xb,yb
 
 def train(model,steps,verbose=True,bsize=64,epochs=100):
-	lossepoch = criterion(model.forward(X_train),Y_train)
-	print(lossepoch.item())
+	
 	for epoch in range(epochs):
 		for step in range(steps):
 			x,y = getbatch(bsize)
 			optimizer.zero_grad()
 			outputs = model.forward(x)
-			loss = criterion(outputs,y)
+			#loss = criterion(outputs,y)
+			loss = torch.sum(torch.sum(torch.pow(torch.sub(outputs,y),2),dim=0)/bsize)/n_outputs
 			loss.backward()
 			optimizer.step()
-		lossepoch = criterion(model.forward(X_train),Y_train)
+		lossepoch = torch.sum(torch.sum(torch.pow(torch.sub(model.forward(X_train),Y_train),2),dim=0)/2921)/n_outputs
 		if verbose: print('epoch-{} training loss:{}'.format(epoch+1,lossepoch.item()))
 
-
+n_outputs = 4760
 n_hidden = int(sys.argv[1])
 dropout_rate = float(sys.argv[2])
 X_train = np.load('GTEx_X_float64.npy')
@@ -52,6 +52,6 @@ Y_train = torch.from_numpy(Y_train).type(torch.FloatTensor).to(device)
 model = Network(n_hidden,dropout_rate)
 model.to(device)
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-criterion = nn.MSELoss()
+#criterion = nn.MSELoss()
 train(model=model,steps=68)
 
