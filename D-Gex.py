@@ -54,7 +54,7 @@ X_train = torch.from_numpy(X_train).type(torch.FloatTensor).to(device)
 Y_train = torch.from_numpy(Y_train).type(torch.FloatTensor).to(device)
 model = Network(n_hidden,dropout_rate)
 model.to(device)
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.0005, momentum=0.9)
 #criterion = nn.MSELoss()
 train(model=model,steps=68)
 
