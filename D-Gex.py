@@ -34,10 +34,13 @@ def train(model,steps,verbose=True,bsize=64,epochs=100):
 			optimizer.zero_grad()
 			outputs = model.forward(x)
 			#loss = criterion(outputs,y)
-			loss = torch.sum(torch.sum(torch.pow(torch.sub(outputs,y),2),dim=0)/bsize)/n_outputs
+			#loss = torch.sum(torch.sum(torch.pow(torch.sub(outputs,y),2),dim=0)/bsize)/n_outputs
+			loss = torch.sum(torch.sum(torch.pow(torch.sub(outputs,y),2),dim=0)/bsize)#new loss according to paper large values of loss
 			loss.backward()
 			optimizer.step()
-		lossepoch = torch.sum(torch.sum(torch.pow(torch.sub(model.forward(X_train),Y_train),2),dim=0)/2921)/n_outputs
+		#lossepoch = torch.sum(torch.sum(torch.pow(torch.sub(model.forward(X_train),Y_train),2),dim=0)/2921)/n_outputs
+		lossepoch = torch.sum(torch.sum(torch.pow(torch.sub(model.forward(X_test),Y_test),2),dim=0)/2921)#new total loss
+		MAE = torch.sum(torch.sum(torch.abs(torch.sub(model.forward(X_test),Y_test)),dim=0)/2921)/n_outputs#this should be the MAE
 		if verbose: print('epoch-{} training loss:{}'.format(epoch+1,lossepoch.item()))
 
 n_outputs = 4760
