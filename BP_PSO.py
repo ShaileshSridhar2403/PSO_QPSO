@@ -55,8 +55,11 @@ class Network_PSO(nn.Module):
 		self.fc2=nn.Linear(self.hidden_units,self.output_units)
 		self.dropout=nn.Dropout(p=dropout_rate)
 		self.softmax = nn.Softmax(dim=1)
-
+	
+	#def forward(self,params,localbcosts,posg,errg): #(new)!!!
 	def forward(self,params,localbcosts):
+		'''errg_best = errg
+		pos_best_g = posg ''' #(new)!!!
 		errg_best = localbcosts[np.argmin(localbcosts)]
 		pos_best_g = np.zeros(params.shape[2])
 		criterion = nn.CrossEntropyLoss()
@@ -120,6 +123,14 @@ def backPropGrad(model,optimizer,pos_g_best,steps,X_train,Y_train,bsize=64):
 		loss.backward()
 		optimizer.step()
 		
+	'''loss.backward()
+	fc1_weight = np.ravel(model.fc1.weight.grad.data.detach().cpu().numpy())
+	fc1_bias = np.ravel(model.fc1.bias.grad.data.detach().cpu().numpy())
+	fc2_weight = np.ravel(model.fc2.weight.grad.data.detach().cpu().numpy())
+	fc2_bias = np.ravel(model.fc2.bias.grad.data.detach().cpu().numpy())
+	grad = np.concatenate((fc1_weight,fc1_bias,fc2_weight,fc2_bias))
+	return grad''' #unrolling the gradients
+		
 	grad = matToVec(model) - pos_g_best
 	return grad
 
@@ -146,6 +157,7 @@ def PSO_grad(swarm,localbcosts,w,c1,c2,c3,maxiter,costfunc,verbose,logfile):
 			print('saturated')
 			return pos_best_g,err_best_g,i
 		t_old = time.time()
+		#pos_best_g,err_best_g,swarm = costfunc(swarm,localbcosts,pos_best_g,err_best_g) pass pos_best_g  and err_best_g (new!!!)
 		pos_best_g,err_best_g,swarm = costfunc(swarm,localbcosts)
 		diff = round(float(err_best_g_prev),6)-round(float(err_best_g),6)
 		if int(diff)==0:
@@ -159,6 +171,7 @@ def PSO_grad(swarm,localbcosts,w,c1,c2,c3,maxiter,costfunc,verbose,logfile):
 #		gradVal = findGrad(model,pos_best_g)
 		gradVal = backPropGrad(model,optimizer,pos_best_g,68,X_train,Y_train)
 		swarm[:,2]*=w
+		#swarm[:,2] += c1*r1*(swarm[:,1]-swarm[:,0]) + c2*r2*(pos_best_g-swarm[:,0])-c3*(swarm[:,0]-gradVal) new velocity update
 		swarm[:,2] += c1*r1*(swarm[:,1]-swarm[:,0]) + c2*r2*(pos_best_g-swarm[:,0]) + c3*gradVal#new velocity
 		
 		swarm[:,0] += alpha*swarm[:,2]					#new position
